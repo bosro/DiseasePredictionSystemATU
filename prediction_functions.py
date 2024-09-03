@@ -21,8 +21,7 @@ parkinsons_model = pickle.load(open('/Users/user/Documents/Tutorials/machineLear
 anemia_model = pickle.load(open('/Users/user/Documents/Tutorials/machineLearning/multiple-disease-prediction-streamlit-app-main/multipleDiseaseProject/addfeatures-permissions/saved_models/fine_tuned_rf_model.pkl', 'rb'))
 typhoid_model = pickle.load(open('/Users/user/Documents/Tutorials/machineLearning/multiple-disease-prediction-streamlit-app-main/multipleDiseaseProject/addfeatures-permissions/saved_models/dt_model.pkl', 'rb'))
 hiv_model = pickle.load(open('/Users/user/Documents/Tutorials/machineLearning/multiple-disease-prediction-streamlit-app-main/multipleDiseaseProject/addfeatures-permissions/saved_models/hiv_prediction_model.pkl', 'rb'))
-breast_cancer_model = pickle.load(open('/Users/user/Documents/Tutorials/machineLearning/multiple-disease-prediction-streamlit-app-main/multipleDiseaseProject/addfeatures-permissions/saved_models/breast_cancer_model.pkl', 'rb'))
-
+#breast_cancer_model = pickle.load(open('/Users/user/Documents/Tutorials/machineLearning/multiple-disease-prediction-streamlit-app-main/multipleDiseaseProject/addfeatures-permissions/saved_models/breast_cancer_model.pkl', 'rb'))
 
 def save_prediction(user_id, prediction_type, input_data, result):
     prediction_ref = db.collection('users').document(user_id).collection('predictions').document()
@@ -560,51 +559,51 @@ def breast_cancer_prediction():
     
     if st.button('Predict Breast Cancer'):
         # Prepare the input data for the model
-        X = np.array(list(input_data.values())).reshape(1, -1)
+        #X = np.array(list(input_data.values())).reshape(1, -1)
         
         # Make prediction
-        prediction = breast_cancer_model.predict(X)
+        #prediction = breast_cancer_model.predict(X)
         
         # Interpret the prediction
-        result = "Malignant (M)" if prediction[0] == 1 else "Benign (B)"
+        #result = "Malignant (M)" if prediction[0] == 1 else "Benign (B)"
         
-        st.success(f'The breast cancer prediction is: {result}')
+        #st.success(f'The breast cancer prediction is: {result}')
         
         st.write("---")
         st.write("### Next Steps and Resources")
         
-        if prediction[0] == 1:
-            st.markdown("""
-            If the prediction indicates a malignant result, consider these steps:
+        #if prediction[0] == 1:
+            #st.markdown("""
+            #If the prediction indicates a malignant result, consider these steps:
             
-            1. **Consult a Doctor**: Schedule an appointment with an oncologist for a thorough evaluation.
-            2. **Further Testing**: Additional tests like biopsies may be necessary for confirmation.
-            3. **Understand Your Options**: Learn about treatment options for breast cancer.
-            4. **Seek Support**: Consider joining support groups or counseling services.
+            #1. **Consult a Doctor**: Schedule an appointment with an oncologist for a thorough evaluation.
+            #2. **Further Testing**: Additional tests like biopsies may be necessary for confirmation.
+            #3. **Understand Your Options**: Learn about treatment options for breast cancer.
+            #4. **Seek Support**: Consider joining support groups or counseling services.
             
-            For comprehensive information on breast cancer:
-            - [American Cancer Society - Breast Cancer](https://www.cancer.org/cancer/breast-cancer.html)
-            - [National Breast Cancer Foundation](https://www.nationalbreastcancer.org/)
-            - [Breastcancer.org](https://www.breastcancer.org/)
-            """)
-        else:
-            st.markdown("""
-            Although the prediction suggests a benign result, it's important to:
+            #For comprehensive information on breast cancer:
+            #- [American Cancer Society - Breast Cancer](https://www.cancer.org/cancer/breast-cancer.html)
+            #- [National Breast Cancer Foundation](https://www.nationalbreastcancer.org/)
+            #- [Breastcancer.org](https://www.breastcancer.org/)
+            #""")
+        #else:
+            #st.markdown("""
+            #Although the prediction suggests a benign result, it's important to:
             
-            1. **Regular Screenings**: Continue with regular breast cancer screenings as recommended by your doctor.
-            2. **Be Aware**: Familiarize yourself with the signs and symptoms of breast cancer.
-            3. **Healthy Lifestyle**: Maintain a healthy lifestyle to reduce breast cancer risk.
+            #1. **Regular Screenings**: Continue with regular breast cancer screenings as recommended by your doctor.
+           # 2. **Be Aware**: Familiarize yourself with the signs and symptoms of breast cancer.
+           # 3. **Healthy Lifestyle**: Maintain a healthy lifestyle to reduce breast cancer risk.
             
-            Learn more about breast health:
-            - [CDC - Breast Cancer](https://www.cdc.gov/cancer/breast/)
-            - [Mayo Clinic - Breast Cancer Prevention](https://www.mayoclinic.org/healthy-lifestyle/womens-health/in-depth/breast-cancer-prevention/art-20044676)
-            - [Susan G. Komen - Breast Self-Awareness](https://www.komen.org/breast-cancer/screening/breast-self-awareness/)
-            """)
+            #Learn more about breast health:
+           # - [CDC - Breast Cancer](https://www.cdc.gov/cancer/breast/)
+            #- [Mayo Clinic - Breast Cancer Prevention](https://www.mayoclinic.org/healthy-lifestyle/womens-health/in-depth/breast-cancer-prevention/art-20044676)
+            #- [Susan G. Komen - Breast Self-Awareness](https://www.komen.org/breast-cancer/screening/breast-self-awareness/)
+            #""")
         
-        st.write("*Disclaimer: This prediction is based on a machine learning model and should not be considered as a medical diagnosis. Always consult with a qualified healthcare professional for proper medical evaluation and diagnosis.*")
+        #st.write("*Disclaimer: This prediction is based on a machine learning model and should not be considered as a medical diagnosis. Always consult with a qualified healthcare professional for proper medical evaluation and diagnosis.*")
         
         # Assuming you have a save_prediction function
-        save_prediction(st.session_state.user.uid, 'Breast Cancer', input_data, result)
+        #save_prediction(st.session_state.user.uid, 'Breast Cancer', input_data, result)
 
 # Make sure to have your model loaded
 # breast_cancer_model = load_your_model_here()

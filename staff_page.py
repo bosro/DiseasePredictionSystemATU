@@ -1,10 +1,9 @@
 import streamlit as st
-from prediction_functions import diabetes_prediction, heart_disease_prediction, parkinsons_prediction,anemia_prediction,hiv_prediction,typhoid_prediction
+from prediction_functions import diabetes_prediction, heart_disease_prediction, parkinsons_prediction, anemia_prediction, hiv_prediction, typhoid_prediction, breast_cancer_prediction
 from user_functions import view_prediction_history, generate_charts
 
 def staff_page():
     st.title('Staff Dashboard')
-
     with st.sidebar:
         st.image("/Users/user/Documents/Tutorials/machineLearning/multiple-disease-prediction-streamlit-app-main/multipleDiseaseProject/addfeatures/atu.png", width=150, use_column_width=True)
         
@@ -17,13 +16,14 @@ def staff_page():
                                  'HIV Prediction',
                                  'Anemia Prediction',
                                  'Typhoid Prediction',
+                                 #'Breast Cancer Prediction',
                                  'Prediction History',
                                  'Prediction Analytics'])
         
         if st.button('Logout'):
             st.session_state.clear()
             st.rerun()
-
+    
     if selected == 'Diabetes Prediction':
         diabetes_prediction()
     elif selected == 'Heart Disease Prediction':
@@ -36,6 +36,8 @@ def staff_page():
         hiv_prediction()
     elif selected == 'Typhoid Prediction':
         typhoid_prediction()
+    #elif selected == 'Breast Cancer Prediction':
+        #breast_cancer_prediction()
     elif selected == 'Prediction History':
         view_prediction_history()
     elif selected == 'Prediction Analytics':
