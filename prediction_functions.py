@@ -5,6 +5,7 @@ from signup import sign_up
 import pickle
 import datetime
 import numpy as np
+import pandas as pd
 
 
 #st.set_page_config(page_title='Disease Prediction App', page_icon="🏥", initial_sidebar_state='expanded')
@@ -460,7 +461,7 @@ def hiv_prediction():
     with col1:
         age = st.number_input('Age', min_value=18, max_value=100, step=1)
     with col2:
-        marital_status = st.selectbox('Marital Status', ['UNMARRIED', 'Married'])
+        marital_staus = st.selectbox('Marital Staus', ['UNMARRIED', 'Married'])
     with col1:
         std = st.selectbox('STD', ['YES', 'NO'])
     with col2:
@@ -477,12 +478,12 @@ def hiv_prediction():
         drug_taking = st.selectbox('Drug-taking', ['YES', 'NO'])
 
     if st.button('HIV Status Prediction'):
-        if not all([age, marital_status, std, education, hiv_test_past_year, aids_education, seeking_partners, sexual_orientation, drug_taking]):
+        if not all([age, marital_staus, std, education, hiv_test_past_year, aids_education, seeking_partners, sexual_orientation, drug_taking]):
             st.error('All fields are required. Please fill in all the information.')
         else:
             input_data = {
                 'Age': int(age),
-                'Marital Status': marital_status,
+                'Marital Staus': marital_staus,
                 'STD': std,
                 'Educational Background': education,
                 'HIV TEST IN PAST YEAR': hiv_test_past_year,
@@ -492,7 +493,9 @@ def hiv_prediction():
                 'Drug-taking': drug_taking
             }
             
-            hiv_prediction = hiv_model.predict([list(input_data.values())])
+            #hiv_prediction = hiv_model.predict([list(input_data.values())])
+            input_df = pd.DataFrame([input_data])
+            hiv_prediction = hiv_model.predict(input_df)
             
             hiv_status = 'POSITIVE' if hiv_prediction[0] == 1 else 'NEGATIVE'
             st.success(f'The predicted HIV status is: {hiv_status}')

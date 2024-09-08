@@ -4,6 +4,7 @@ from firebase_config import db
 import re
 import logging
 import os
+from firebase_admin import firestore
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -25,15 +26,20 @@ def sign_up():
         password = st.text_input('Password', placeholder='Enter Your Password', type='password')
         confirm_password = st.text_input('Confirm Password', placeholder='Confirm Your Password', type='password')
         role = st.selectbox('Role', ['Staff', 'Admin'])
-        admin_key = st.text_input('Admin Key', type='password') if role == 'Admin' else None
+        admin_invite_code = st.text_input('Admin Invite Code', type='password') if role == 'Admin' else None
         
         submitted = st.form_submit_button("Sign Up")
-        #'8-2H2jpGxBGGdTAfK4bHiLNdut-fHazU9UWR9qxUWqs'
+        
         if submitted:
-            admin_secret_key = os.getenv('ADMIN_SECRET_KEY')
-            if role == 'Admin' and admin_key != admin_secret_key:
-                st.error('Invalid admin key')
-            elif not email or not username or not password or not confirm_password:
+            if role == 'Admin':
+                # Check if the invite code exists and is valid
+                invite_ref = db.collection('admin_invites').document(admin_invite_code)
+                invite_doc = invite_ref.get()
+                if not invite_doc.exists or invite_doc.to_dict().get('used', False):
+                    st.error('Invalid or used admin invite code')
+                    return
+            
+            if not email or not username or not password or not confirm_password:
                 st.error('All fields are required.')
             elif not validate_email(email):
                 st.error('Invalid email format.')
@@ -59,6 +65,10 @@ def sign_up():
                         'username': username,
                         'role': role.lower()
                     })
+                    
+                    if role == 'Admin':
+                        # Mark the invite code as used
+                        invite_ref.update({'used': True})
                     
                     logger.info(f"User created successfully: {user.uid}")
                     st.success('Account created successfully')

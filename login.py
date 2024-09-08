@@ -1,10 +1,33 @@
 import streamlit as st
-from firebase_admin import auth
+from firebase_admin import auth, credentials
 from firebase_config import db
 import logging
+import requests
+import json
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# You'll need to set this to your Firebase project's web API key
+FIREBASE_WEB_API_KEY = "AIzaSyDMv4uvjb9Igjl-m8q54H7Xmvz8PExs6xE"
+
+def verify_password(email, password):
+    request_data = {
+        "email": email,
+        "password": password,
+        "returnSecureToken": True
+    }
+    rest_api_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_WEB_API_KEY}"
+    
+    try:
+        response = requests.post(rest_api_url, data=json.dumps(request_data))
+        if response.ok:
+            return True
+        else:
+            return False
+    except Exception as e:
+        logger.error(f"Error verifying password: {str(e)}")
+        return False
 
 def login():
     st.header('Login')
@@ -20,25 +43,39 @@ def login():
                 st.error('Both email and password are required.')
             else:
                 try:
-                    user = auth.get_user_by_email(email)
-                    logger.info(f"User found: {user.uid}")
-                    
-                    # Get user role from Firestore
-                    user_doc = db.collection('users').document(user.uid).get()
-                    if user_doc.exists:
-                        user_data = user_doc.to_dict()
-                        role = user_data.get('role', 'staff')  # Default to staff if role not found
+                    # Verify password using Firebase Authentication REST API
+                    if verify_password(email, password):
+                        # If password is correct, get user data
+                        user = auth.get_user_by_email(email)
+                        logger.info(f"User authenticated: {user.uid}")
+                        
+                        # Get user role from Firestore
+                        user_doc = db.collection('users').document(user.uid).get()
+                        if user_doc.exists:
+                            user_data = user_doc.to_dict()
+                            role = user_data.get('role')
+                            
+                            if role not in ['admin', 'staff']:
+                                logger.warning(f"Invalid role for user {user.uid}: {role}")
+                                st.error('Invalid user role. Please contact an administrator.')
+                                return
+                            
+                            # Set session state
+                            st.session_state['user'] = user
+                            st.session_state['role'] = role
+                            st.session_state['page'] = 'admin' if role == 'admin' else 'staff'
+                            
+                            st.success(f'Logged in successfully as {role}')
+                            st.rerun()
+                        else:
+                            logger.warning(f"User document not found for {user.uid}")
+                            st.error('User data not found. Please contact an administrator.')
                     else:
-                        role = 'staff'  # Default role
-                    
-                    st.session_state['user'] = user
-                    st.session_state['role'] = role
-                    st.session_state['page'] = 'staff' if role == 'staff' else 'admin'
-                    st.success('Logged in successfully')
-                    st.rerun()
+                        st.error('Invalid email or password')
+                
                 except auth.UserNotFoundError:
                     logger.warning(f"User not found for email: {email}")
                     st.error('Invalid email or password')
                 except Exception as e:
                     logger.error(f"Error during login: {str(e)}")
-                    st.error(f'An error occurred: {str(e)}')
+                    st.error('An error occurred during login. Please try again later.')
