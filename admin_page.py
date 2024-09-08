@@ -3,6 +3,7 @@ from admin_functions import manage_database, view_overall_predictions, generate_
 from firebase_admin import auth, firestore
 from firebase_config import db
 import secrets
+from datetime import datetime
 
 def generate_admin_invite_code():
     return secrets.token_urlsafe(16)
@@ -10,7 +11,7 @@ def generate_admin_invite_code():
 def create_admin_invite():
     invite_code = generate_admin_invite_code()
     db.collection('admin_invites').document(invite_code).set({
-        'created_at': firestore.firestore.SERVER_TIMESTAMP,
+        'created_at': datetime.now(),
         'used': False
     })
     return invite_code
@@ -25,7 +26,7 @@ def manage_users():
             new_role = st.selectbox("Change Role", ['staff', 'admin'], 
                                     index=0 if user_data['role'] == 'staff' else 1, 
                                     key=f"role_{user.id}")
-            if st.button("Update Role", key=f"update_{user.id}"):
+            if st.button("Update Role", key=f"update_role_{user.id}"):
                 # Update role in Firestore
                 db.collection('users').document(user.id).update({'role': new_role})
                 # Update custom claims in Firebase Auth
@@ -51,7 +52,7 @@ def admin_page():
     
     if selected == 'Manage Database':
         manage_database()
-        manage_users()  # Added user management function
+        manage_users()
     elif selected == 'View Overall Predictions':
         view_overall_predictions()
     elif selected == 'Generate Admin Reports':

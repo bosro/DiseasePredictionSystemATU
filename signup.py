@@ -3,7 +3,6 @@ from firebase_admin import auth
 from firebase_config import db
 import re
 import logging
-import os
 from firebase_admin import firestore
 
 logging.basicConfig(level=logging.INFO)
@@ -32,11 +31,22 @@ def sign_up():
         
         if submitted:
             if role == 'Admin':
+                if not admin_invite_code:
+                    st.error('Admin invite code is required for admin sign-up.')
+                    return
                 # Check if the invite code exists and is valid
                 invite_ref = db.collection('admin_invites').document(admin_invite_code)
-                invite_doc = invite_ref.get()
-                if not invite_doc.exists or invite_doc.to_dict().get('used', False):
-                    st.error('Invalid or used admin invite code')
+                try:
+                    invite_doc = invite_ref.get()
+                    if not invite_doc.exists:
+                        st.error('Invalid admin invite code')
+                        return
+                    if invite_doc.to_dict().get('used', False):
+                        st.error('This admin invite code has already been used')
+                        return
+                except Exception as e:
+                    logger.error(f"Error checking admin invite: {str(e)}")
+                    st.error('An error occurred while verifying the admin invite code')
                     return
             
             if not email or not username or not password or not confirm_password:

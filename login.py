@@ -29,6 +29,23 @@ def verify_password(email, password):
         logger.error(f"Error verifying password: {str(e)}")
         return False
 
+def send_password_reset_email(email):
+    request_data = {
+        "requestType": "PASSWORD_RESET",
+        "email": email
+    }
+    rest_api_url = f"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={FIREBASE_WEB_API_KEY}"
+    
+    try:
+        response = requests.post(rest_api_url, data=json.dumps(request_data))
+        if response.ok:
+            return True
+        else:
+            return False
+    except Exception as e:
+        logger.error(f"Error sending password reset email: {str(e)}")
+        return False
+
 def login():
     st.header('Login')
     
@@ -36,7 +53,11 @@ def login():
         email = st.text_input('Email', placeholder='Enter Your Email')
         password = st.text_input('Password', placeholder='Enter Your Password', type='password')
         
-        submitted = st.form_submit_button("Login")
+        col1, col2 = st.columns([1,1])
+        with col1:
+            submitted = st.form_submit_button("Login")
+        with col2:
+            forgot_password = st.form_submit_button("Forgot Password")
         
         if submitted:
             if not email or not password:
@@ -79,3 +100,12 @@ def login():
                 except Exception as e:
                     logger.error(f"Error during login: {str(e)}")
                     st.error('An error occurred during login. Please try again later.')
+        
+        elif forgot_password:
+            if not email:
+                st.error('Please enter your email address to reset your password.')
+            else:
+                if send_password_reset_email(email):
+                    st.success('Password reset email sent. Please check your inbox.')
+                else:
+                    st.error('An error occurred while sending the password reset email. Please try again later.')
