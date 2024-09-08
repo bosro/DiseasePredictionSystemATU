@@ -9,4 +9,5 @@ xgboost==1.7.6
 protobuf==4.25.4
 gunicorn==21.2.0
 firebase-admin==6.1.0
-reportlab==3.6.13
+reportlab==3.6.9
+
