@@ -1,5 +1,5 @@
 import streamlit as st
-from prediction_functions import diabetes_prediction, heart_disease_prediction, parkinsons_prediction, anemia_prediction, hiv_prediction, typhoid_prediction, breast_cancer_prediction
+from prediction_functions import diabetes_prediction, heart_disease_prediction, parkinsons_prediction, anemia_prediction, hiv_prediction, typhoid_prediction, breast_cancer_prediction, generate_patient_diagnosis_report
 from user_functions import view_prediction_history, generate_charts
 
 def staff_page():
@@ -16,6 +16,7 @@ def staff_page():
                                  'HIV Prediction',
                                  'Anemia Prediction',
                                  'Typhoid Prediction',
+                                 'Patient Diagnosis Report',
                                  #'Breast Cancer Prediction',
                                  'Prediction History',
                                  'Prediction Analytics'])
@@ -38,6 +39,8 @@ def staff_page():
         typhoid_prediction()
     #elif selected == 'Breast Cancer Prediction':
         #breast_cancer_prediction()
+    elif selected == 'Patient Diagnosis Report':
+        generate_patient_diagnosis_report()
     elif selected == 'Prediction History':
         view_prediction_history()
     elif selected == 'Prediction Analytics':

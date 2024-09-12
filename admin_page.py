@@ -51,7 +51,7 @@ def admin_page():
             st.rerun()
     
     if selected == 'Manage Database':
-        manage_database()
+        #manage_database()
         manage_users()
     elif selected == 'View Overall Predictions':
         view_overall_predictions()

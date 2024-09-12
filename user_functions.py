@@ -9,22 +9,50 @@ from reportlab.pdfgen import canvas
 from firebase_admin import firestore
 
 
-def view_prediction_history():
-    st.subheader("Prediction History")
-    predictions = get_user_predictions(st.session_state.user.uid)
+#def view_prediction_history():
+    #st.subheader("Prediction History")
+    #predictions = get_user_predictions(st.session_state.user.uid)
     
+    #for pred in predictions:
+        #with st.expander(f"{pred['type']} - {pred['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}"):
+            #st.write(f"Result: {pred['result']}")
+            #st.write("Input Data:")
+            #or key, value in pred['input_data'].items():
+                #st.write(f"- {key}: {value}")
+
+    #if st.button("Generate Report"):
+        #report_buffer = generate_report(st.session_state.user, predictions)
+        #b64 = base64.b64encode(report_buffer.getvalue()).decode()
+        #href = f'<a href="data:application/pdf;base64,{b64}" download="prediction_report.pdf">Download PDF Report</a>'
+        #st.markdown(href, unsafe_allow_html=True)
+        
+
+def view_prediction_history():
+    st.subheader("Prediction and Diagnosis History")
+    
+    predictions = get_user_predictions(st.session_state.user.uid)
+    diagnosis_reports = get_user_diagnosis_reports(st.session_state.user.uid)
+    
+    st.write("### Predictions")
     for pred in predictions:
         with st.expander(f"{pred['type']} - {pred['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}"):
             st.write(f"Result: {pred['result']}")
             st.write("Input Data:")
             for key, value in pred['input_data'].items():
                 st.write(f"- {key}: {value}")
+    
+    st.write("### Diagnosis Reports")
+    for report in diagnosis_reports:
+        with st.expander(f"{report['disease_type']} - {report['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}"):
+            st.write(f"Patient: {report['patient_name']}")
+            st.write(f"Age: {report['patient_age']}")
+            st.write(f"Gender: {report['patient_gender']}")
+            st.write(f"Prediction Result: {report['prediction_result']}")
+            st.write(f"Additional Notes: {report['additional_notes']}")
 
-    if st.button("Generate Report"):
-        report_buffer = generate_report(st.session_state.user, predictions)
-        b64 = base64.b64encode(report_buffer.getvalue()).decode()
-        href = f'<a href="data:application/pdf;base64,{b64}" download="prediction_report.pdf">Download PDF Report</a>'
-        st.markdown(href, unsafe_allow_html=True)
+def get_user_diagnosis_reports(user_id):
+    reports = db.collection('users').document(user_id).collection('diagnosis_reports').order_by('timestamp', direction=firestore.Query.DESCENDING).get()
+    return [report.to_dict() for report in reports]
         
         
 

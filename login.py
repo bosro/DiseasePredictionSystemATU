@@ -8,7 +8,7 @@ import json
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# You'll need to set this to your Firebase project's web API key
+#  Firebase project's web API key
 FIREBASE_WEB_API_KEY = "AIzaSyDMv4uvjb9Igjl-m8q54H7Xmvz8PExs6xE"
 
 def verify_password(email, password):

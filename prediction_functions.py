@@ -1,12 +1,17 @@
 import streamlit as st
 from firebase_config import db, initialize_firebase
 import logging
-from signup import sign_up
+ #from signup import sign_up
 import pickle
 import datetime
 import numpy as np
 import pandas as pd
-
+import base64
+import io
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.lib.pagesizes import letter
 
 #st.set_page_config(page_title='Disease Prediction App', page_icon="🏥", initial_sidebar_state='expanded')
 
@@ -72,8 +77,10 @@ def diabetes_prediction():
             
             diab_prediction = diabetes_model.predict([list(input_data.values())])
             
+            #diab_diagnosis = 'The person is likely Diabetic' if diab_prediction[0] == 1 else 'The person is not Diabetic'
+            #st.success(diab_diagnosis)
             diab_diagnosis = 'The person is likely Diabetic' if diab_prediction[0] == 1 else 'The person is not Diabetic'
-            st.success(diab_diagnosis)
+            return diab_diagnosis  # Return instead of using st.success()
             
             st.write("---")
             st.write("### Next Steps and Resources")
@@ -155,7 +162,8 @@ def heart_disease_prediction():
             heart_prediction = heart_disease_model.predict([list(input_data.values())])
                                                              
             heart_diagnosis = 'The person is likely to have a heart disease' if heart_prediction[0] == 1 else 'The person does not have any heart disease'
-            st.success(heart_diagnosis)
+            #st.success(heart_diagnosis)
+            return heart_diagnosis
             
             st.write("---")
             st.write("### Next Steps and Resources")
@@ -257,6 +265,7 @@ def parkinsons_prediction():
                                                                
             parkinsons_diagnosis = 'The person is likely to have Parkinsons' if parkinsons_prediction[0] == 1 else 'The person does not have Parkinsons'
             st.success(parkinsons_diagnosis)
+            return parkinsons_diagnosis
             
             st.write("---")
             st.write("### Next Steps and Resources")
@@ -323,7 +332,8 @@ def anemia_prediction():
             anemia_prediction = anemia_model.predict([list(input_data.values())])
             
             anemia_diagnosis = 'The person is likely to have anemia' if anemia_prediction[0] == 1 else 'The person is not likely to have anemia'
-            st.success(anemia_diagnosis)
+            #st.success(anemia_diagnosis)
+            return anemia_diagnosis
             
             st.write("---")
             st.write("### Next Steps and Resources")
@@ -415,7 +425,8 @@ def typhoid_prediction():
             typhoid_prediction = typhoid_model.predict([list(input_data.values())])
             
             typhoid_diagnosis = 'The person is likely to have typhoid' if typhoid_prediction[0] == 1 else 'The person is not likely to have typhoid'
-            st.success(typhoid_diagnosis)
+            #st.success(typhoid_diagnosis)
+            return typhoid_diagnosis
             
             st.write("---")
             st.write("### Next Steps and Resources")
@@ -498,8 +509,10 @@ def hiv_prediction():
             hiv_prediction = hiv_model.predict(input_df)
             
             hiv_status = 'POSITIVE' if hiv_prediction[0] == 1 else 'NEGATIVE'
-            st.success(f'The predicted HIV status is: {hiv_status}')
-            
+            #st.success(f'The predicted HIV status is: {hiv_status}')
+            hiv_statuss = f'he predicted HIV status is: {hiv_status}'
+            return hiv_statuss
+        
             st.write("---")
             st.write("### Next Steps and Resources")
             
@@ -536,6 +549,106 @@ def hiv_prediction():
             save_prediction(st.session_state.user.uid, 'HIV', input_data, hiv_status)
             
             
+
+
+
+def generate_patient_diagnosis_report():
+    st.subheader("Generate Patient Diagnosis Report")
+
+    # Patient Information
+    patient_name = st.text_input("Patient Name")
+    patient_age = st.number_input("Patient Age", min_value=0, max_value=120)
+    patient_gender = st.selectbox("Patient Gender", ["Male", "Female", "Other"])
+
+    # Disease Prediction
+    disease_type = st.selectbox("Select Disease Type", 
+                                ['Diabetes', 'Heart Disease', 'Parkinsons', 'HIV', 'Anemia', 'Typhoid'])
+
+    # Call the appropriate prediction function based on the selected disease type
+    if disease_type == 'Diabetes':
+        prediction_result = diabetes_prediction()
+    elif disease_type == 'Heart Disease':
+        prediction_result = heart_disease_prediction()
+    elif disease_type == 'Parkinsons':
+        prediction_result = parkinsons_prediction()
+    elif disease_type == 'HIV':
+        prediction_result = hiv_prediction()
+    elif disease_type == 'Anemia':
+        prediction_result = anemia_prediction()
+    elif disease_type == 'Typhoid':
+        prediction_result = typhoid_prediction()
+
+    # Additional Notes
+    additional_notes = st.text_area("Additional Notes")
+
+    if st.button("Generate Diagnosis Report"):
+        # Create PDF
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        elements = []
+
+        styles = getSampleStyleSheet()
+        elements.append(Paragraph("Patient Diagnosis Report", styles['Title']))
+        elements.append(Paragraph(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", styles['Normal']))
+        elements.append(Paragraph("", styles['Normal']))
+
+        # Patient Information Table
+        patient_data = [
+            ["Patient Name", patient_name],
+            ["Age", patient_age],
+            ["Gender", patient_gender]
+        ]
+        patient_table = Table(patient_data)
+        patient_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (0, -1), colors.grey),
+            ('TEXTCOLOR', (0, 0), (0, -1), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ('BACKGROUND', (1, 0), (-1, -1), colors.beige),
+            ('BOX', (0, 0), (-1, -1), 1, colors.black),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+        elements.append(patient_table)
+        elements.append(Paragraph("", styles['Normal']))
+
+        # Diagnosis Information
+        elements.append(Paragraph(f"Disease Type: {disease_type}", styles['Heading2']))
+        elements.append(Paragraph(f"Prediction Result: {prediction_result}", styles['Normal']))
+        elements.append(Paragraph("", styles['Normal']))
+
+        # Additional Notes
+        elements.append(Paragraph("Additional Notes:", styles['Heading2']))
+        elements.append(Paragraph(additional_notes, styles['Normal']))
+
+        # Build PDF
+        doc.build(elements)
+        buffer.seek(0)
+
+        # Offer PDF for download
+        b64 = base64.b64encode(buffer.getvalue()).decode()
+        href = f'<a href="data:application/pdf;base64,{b64}" download="patient_diagnosis_report.pdf">Download Patient Diagnosis Report</a>'
+        st.markdown(href, unsafe_allow_html=True)
+
+        # Save to database
+        save_diagnosis_report(st.session_state.user.uid, {
+            'patient_name': patient_name,
+            'patient_age': patient_age,
+            'patient_gender': patient_gender,
+            'disease_type': disease_type,
+            'prediction_result': prediction_result,
+            'additional_notes': additional_notes,
+            'timestamp': datetime.now()
+        })
+
+        st.success("Diagnosis report generated and saved successfully!")
+
+def save_diagnosis_report(user_id, report_data):
+    db.collection('users').document(user_id).collection('diagnosis_reports').add(report_data)
+
+
+
             
 
 
